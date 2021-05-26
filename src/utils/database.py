@@ -68,7 +68,7 @@ class ClientDB():
         session.commit()
 
 
-class CreditCardDB():
+class CreditCardTable():
     """
     """
 

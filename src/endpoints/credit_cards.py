@@ -1,13 +1,13 @@
 from utils.exceptions import ApiException
 from utils.exceptions import ApiException
 from utils.responses import error_response, ok_response
-from utils.database import CreditCardDB
+from utils.database import CreditCardTable
 from datetime import datetime
 from werkzeug.local import LocalProxy
 
 def fetch_credit_cards():
     try:
-        credit_cards = CreditCardDB.fetch_all()
+        credit_cards = CreditCardTable.fetch_all()
 
         return ok_response(200, {"credit_cards": credit_cards})
 
@@ -22,7 +22,7 @@ def insert_credit_card(request: LocalProxy):
         if not request.is_json:
             raise ApiException("Request is not JSON", 400)
         
-        CreditCardDB.insert(request.json)
+        CreditCardTable.insert(request.json)
 
         return ok_response(200, {"inserted_at": datetime.today().isoformat()})
 
@@ -35,7 +35,7 @@ def insert_credit_card(request: LocalProxy):
 
 def fetch_credit_card(id: str):
     try:
-        credit_card = CreditCardDB.fetch_by_id(id)
+        credit_card = CreditCardTable.fetch_by_id(id)
 
         return ok_response(200, {"credit_card": credit_card})
 
@@ -50,7 +50,7 @@ def update_credit_card(id: str, request: LocalProxy):
         if not request.is_json:
             raise ApiException("Request is not JSON", 400)
 
-        CreditCardDB.update_by_id(id, request.json)
+        CreditCardTable.update_by_id(id, request.json)
 
         return ok_response(200, {"updated_at": datetime.today().isoformat()})
 
@@ -62,7 +62,7 @@ def update_credit_card(id: str, request: LocalProxy):
 
 def delete_credit_card(id: str):
     try:
-        CreditCardDB.delete_by_id(id)
+        CreditCardTable.delete_by_id(id)
 
         return ok_response(200, {"deleted_at": datetime.today().isoformat()})
 
