@@ -2,7 +2,7 @@ from flask import Flask, request
 from flask_cors import CORS, cross_origin
 
 import settings
-from endpoints import clients, credit_cards
+from endpoints import clients, credit_cards, benefits
 
 server = Flask(__name__)
 server.config.from_object(settings)
@@ -54,14 +54,26 @@ def credit_card_route(id: str):
     return response
 
 
-@server.route("/api/benefits", methods=["GET"])
+@server.route("/api/benefits", methods=["GET", "POST"])
 def benefits_route():
     if request.method == "GET":
-        pass
+        response = benefits.fetch_benefits()
     elif request.method == "POST":
-        pass
+        response = benefits.insert_benefit(request)
 
-    return 0
+    return response
+
+
+@server.route("/api/benefits/<id>", methods=["GET", "PATCH", "DELETE"])
+def benefit_route(id: str):
+    if request.method == "GET":
+        response = benefits.fetch_benefit(id)
+    elif request.method == "PATCH":
+        response = benefits.update_benefit(id, request)
+    elif request.method == "DELETE":
+        response = benefits.delete_benefit(id)
+
+    return response
 
 
 @server.route("/api/preapprovals", methods=["GET", "POST"])
