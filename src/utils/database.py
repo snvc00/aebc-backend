@@ -8,7 +8,7 @@ from sqlalchemy.orm.session import Session
 from utils.exceptions import ApiException
 
 
-class ClientDB():
+class ClientTable():
     """
     """
 
