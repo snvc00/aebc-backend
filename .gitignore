@@ -1,0 +1,12 @@
+# Text Editor / IDE
+.idea
+.vscode
+.vs
+
+# Python
+venv
+__init__.py
+__pycache__
+
+# Env
+*.env
