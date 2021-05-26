@@ -2,6 +2,7 @@ from utils.exceptions import ApiException
 from utils.responses import error_response, ok_response
 from utils.database import ClientDB
 from datetime import datetime
+from werkzeug.local import LocalProxy
 
 def fetch_clients():
     try:
@@ -15,13 +16,12 @@ def fetch_clients():
         return error_response(500, e.__class__.__name__, str(e))
 
 
-def insert_client(request):
+def insert_client(request: LocalProxy):
     try:
         if not request.is_json:
             raise ApiException("Request is not JSON", 400)
         
-        db = ClientDB()
-        db.insert(request.json)
+        ClientDB.insert(request.json)
 
         return ok_response(200, {"inserted_at": datetime.today().isoformat()})
 
@@ -32,7 +32,7 @@ def insert_client(request):
     
 
 
-def fetch_client(curp):
+def fetch_client(curp: str):
     try:
         client = ClientDB.fetch_by_curp(curp)
 
@@ -44,7 +44,7 @@ def fetch_client(curp):
         return error_response(500, e.__class__.__name__, str(e))
 
 
-def update_client(curp: str, request):
+def update_client(curp: str, request: LocalProxy):
     try:
         if not request.is_json:
             raise ApiException("Request is not JSON", 400)
