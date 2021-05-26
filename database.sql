@@ -69,7 +69,7 @@ CREATE TABLE benefit
 (
     id          BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     description VARCHAR(300) NOT NULL,
-    valid_until TIMESTAMP DEFAULT NOW()
+    valid_until DATETIME NOT NULL
 );
 
 
