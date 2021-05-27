@@ -6,6 +6,7 @@ CREATE TABLE client
     id             BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name           VARCHAR(50)        NOT NULL,
     rfc            VARCHAR(13) UNIQUE NOT NULL,
+    birthdate      DATE               NOT NULL,
     password       VARCHAR(20)        NOT NULL,
     monthly_income BIGINT             NOT NULL,
     has_credit     BOOLEAN            NOT NULL,
@@ -69,7 +70,7 @@ CREATE TABLE benefit
 (
     id          BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     description VARCHAR(300) NOT NULL,
-    valid_until DATETIME NOT NULL
+    valid_until DATETIME     NOT NULL
 );
 
 
@@ -77,8 +78,8 @@ CREATE TABLE admin_token
 (
     id            BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     token         VARCHAR(30) NOT NULL,
-    creation_date TIMESTAMP DEFAULT NOW(),
-    is_active     BOOLEAN   DEFAULT true
+    creation_date DATETIME    NOT NULL DEFAULT NOW(),
+    is_active     BOOLEAN              DEFAULT true
 );
 
 
