@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Integer, String
+from sqlalchemy import Boolean, Column, Integer, String, Date
 from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
@@ -12,6 +12,7 @@ class Client(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
     rfc = Column(String)
+    birthdate = Column(Date)
     password = Column(String)
     monthly_income = Column(Integer)
     has_credit = Column(Boolean)
