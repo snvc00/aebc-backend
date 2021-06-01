@@ -4,9 +4,18 @@ from utils.responses import error_response, ok_response
 from utils.database import CreditCardTable
 from datetime import datetime
 from werkzeug.local import LocalProxy
+from utils.auth import Auth
 
-def fetch_credit_cards():
+def fetch_credit_cards(request: LocalProxy):
     try:
+        token = request.headers.get("Token", None)
+
+        if token is None:
+            raise ApiException("Token headers is required", 400)
+
+        if not Auth.is_valid_token(token):
+            raise ApiException("Invalid Token", 400)
+
         credit_cards = CreditCardTable.fetch_all()
 
         return ok_response(200, {"credit_cards": credit_cards})
@@ -19,6 +28,14 @@ def fetch_credit_cards():
 
 def insert_credit_card(request: LocalProxy):
     try:
+        token = request.headers.get("Token", None)
+
+        if token is None:
+            raise ApiException("Token headers is required", 400)
+
+        if not Auth.is_valid_token(token):
+            raise ApiException("Invalid Token", 400)
+
         if not request.is_json:
             raise ApiException("Request is not JSON", 400)
         
@@ -33,8 +50,16 @@ def insert_credit_card(request: LocalProxy):
     
 
 
-def fetch_credit_card(id: str):
+def fetch_credit_card(id: str, request: LocalProxy):
     try:
+        token = request.headers.get("Token", None)
+
+        if token is None:
+            raise ApiException("Token headers is required", 400)
+
+        if not Auth.is_valid_token(token):
+            raise ApiException("Invalid Token", 400)
+
         credit_card = CreditCardTable.fetch_by_id(id)
 
         return ok_response(200, {"credit_card": credit_card})
@@ -47,6 +72,14 @@ def fetch_credit_card(id: str):
 
 def update_credit_card(id: str, request: LocalProxy):
     try:
+        token = request.headers.get("Token", None)
+
+        if token is None:
+            raise ApiException("Token headers is required", 400)
+
+        if not Auth.is_valid_token(token):
+            raise ApiException("Invalid Token", 400)
+
         if not request.is_json:
             raise ApiException("Request is not JSON", 400)
 
@@ -60,8 +93,16 @@ def update_credit_card(id: str, request: LocalProxy):
         return error_response(500, e.__class__.__name__, str(e))
 
 
-def delete_credit_card(id: str):
+def delete_credit_card(id: str, request: LocalProxy):
     try:
+        token = request.headers.get("Token", None)
+
+        if token is None:
+            raise ApiException("Token headers is required", 400)
+
+        if not Auth.is_valid_token(token):
+            raise ApiException("Invalid Token", 400)
+
         CreditCardTable.delete_by_id(id)
 
         return ok_response(200, {"deleted_at": datetime.today().isoformat()})
