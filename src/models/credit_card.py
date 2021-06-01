@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Integer, String
+from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import declarative_base
 
 
@@ -16,6 +16,8 @@ class CreditCard(Base):
     name = Column(String)
     tier = Column(Integer)
     image = Column(String)
+    cat = Column(Integer)
+    annual_fee = Column(Integer)
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__()
