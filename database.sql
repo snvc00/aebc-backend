@@ -37,7 +37,9 @@ CREATE TABLE credit_card
     max_credit INT         NOT NULL,
     tier       INT         NOT NULL DEFAULT 0,
     image      VARCHAR(50) NOT NULL,
-    name       VARCHAR(50) NOT NULL
+    name       VARCHAR(50) NOT NULL,
+    cat        INT         NOT NULL,
+    annual_fee INT         NOT NULL
 );
 
 
@@ -77,7 +79,7 @@ CREATE TABLE benefit
 CREATE TABLE admin_token
 (
     id            BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    token         VARCHAR(30) NOT NULL,
+    token         VARCHAR(30) UNIQUE NOT NULL,
     creation_date DATETIME    NOT NULL DEFAULT NOW(),
     is_active     BOOLEAN              DEFAULT true
 );
