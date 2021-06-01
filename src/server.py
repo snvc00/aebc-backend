@@ -2,7 +2,7 @@ from flask import Flask, request
 from flask_cors import CORS, cross_origin
 
 import settings
-from endpoints import clients, credit_cards, benefits
+from endpoints import clients, credit_cards, benefits, token_auth
 
 server = Flask(__name__)
 server.config.from_object(settings)
@@ -12,7 +12,7 @@ CORS(server, support_credentials=True)
 @server.route("/api/clients", methods=["GET", "POST"])
 def clients_route():
     if request.method == "GET":
-        response = clients.fetch_clients()
+        response = clients.fetch_clients(request)
     elif request.method == "POST":
         response = clients.insert_client(request)
 
@@ -22,11 +22,11 @@ def clients_route():
 @server.route("/api/clients/<curp>", methods=["GET", "PATCH", "DELETE"])
 def client_route(curp: str):
     if request.method == "GET":
-        response = clients.fetch_client(curp)
+        response = clients.fetch_client(curp, request)
     elif request.method == "PATCH":
         response = clients.update_client(curp, request)
     elif request.method == "DELETE":
-        response = clients.delete_client(curp)
+        response = clients.delete_client(curp, request)
 
     return response
 
@@ -34,9 +34,8 @@ def client_route(curp: str):
 @server.route("/api/cards", methods=["GET", "POST"])
 def credit_cards_route():
     if request.method == "GET":
-        response = credit_cards.fetch_credit_cards()
+        response = credit_cards.fetch_credit_cards(request)
     elif request.method == "POST":
-        print(type(request))
         response = credit_cards.insert_credit_card(request)
 
     return response
@@ -45,11 +44,11 @@ def credit_cards_route():
 @server.route("/api/cards/<id>", methods=["GET", "PATCH", "DELETE"])
 def credit_card_route(id: str):
     if request.method == "GET":
-        response = credit_cards.fetch_credit_card(id)
+        response = credit_cards.fetch_credit_card(id, request)
     elif request.method == "PATCH":
         response = credit_cards.update_credit_card(id, request)
     elif request.method == "DELETE":
-        response = credit_cards.delete_credit_card(id)
+        response = credit_cards.delete_credit_card(id, request)
 
     return response
 
@@ -84,6 +83,14 @@ def preapproval_requests_route():
         pass
 
     return 0
+
+
+@server.route("/api/auth", methods=["GET"])
+def auth_token():
+    if request.method == "GET":
+        response = token_auth.verify_token(request)
+    
+    return response
 
 
 if __name__ == "__main__":
