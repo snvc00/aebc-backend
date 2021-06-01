@@ -1,3 +1,4 @@
+from models.admin_token import AdminToken
 from models.benefit import Benefit
 import settings
 from models.client import Client
@@ -185,4 +186,29 @@ class BenefitTable():
         if affected_rows == 0:
             raise ApiException("Benefit not found", 404)
 
+        session.commit()
+
+class AdminTokenTable():
+    """
+    """
+
+    def fetch(token: str) -> dict:
+        engine = create_engine(settings.DB_URL)
+        session = Session(engine, future=True)
+        token_instance = session.query(AdminToken).filter_by(token=token).first()
+
+        if token_instance is None:
+            raise ApiException("Token not found", 404)
+
+        token = token_instance.__dict__
+        token.pop("_sa_instance_state", None)
+
+        return token
+
+    def insert(new_token: dict) -> None:
+        engine = create_engine(settings.DB_URL)
+        session = Session(engine, future=True)
+        new_token = AdminToken(data=new_token)
+
+        session.add(new_token)
         session.commit()
