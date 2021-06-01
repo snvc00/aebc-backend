@@ -3,9 +3,18 @@ from utils.responses import error_response, ok_response
 from utils.database import ClientTable
 from datetime import datetime
 from werkzeug.local import LocalProxy
+from utils.auth import Auth
 
-def fetch_clients():
+def fetch_clients(request: LocalProxy):
     try:
+        token = request.headers.get("Token", None)
+
+        if token is None:
+            raise ApiException("Token headers is required", 400)
+
+        if not Auth.is_valid_token(token):
+            raise ApiException("Invalid Token", 400)
+
         clients = ClientTable.fetch_all()
 
         return ok_response(200, {"clients": clients})
@@ -18,6 +27,14 @@ def fetch_clients():
 
 def insert_client(request: LocalProxy):
     try:
+        token = request.headers.get("Token", None)
+
+        if token is None:
+            raise ApiException("Token headers is required", 400)
+
+        if not Auth.is_valid_token(token):
+            raise ApiException("Invalid Token", 400)
+
         if not request.is_json:
             raise ApiException("Request is not JSON", 400)
         
@@ -28,12 +45,21 @@ def insert_client(request: LocalProxy):
     except ApiException as e:
         return error_response(e.status_code, "ApiException", e.message)
     except Exception as e:
+        print(e.__class__.__name__, str(e))
         return error_response(500, e.__class__.__name__, str(e))
     
 
 
-def fetch_client(curp: str):
+def fetch_client(curp: str, request: LocalProxy):
     try:
+        token = request.headers.get("Token", None)
+
+        if token is None:
+            raise ApiException("Token headers is required", 400)
+
+        if not Auth.is_valid_token(token):
+            raise ApiException("Invalid Token", 400)
+
         client = ClientTable.fetch_by_curp(curp)
 
         return ok_response(200, {"client": client})
@@ -46,6 +72,14 @@ def fetch_client(curp: str):
 
 def update_client(curp: str, request: LocalProxy):
     try:
+        token = request.headers.get("Token", None)
+
+        if token is None:
+            raise ApiException("Token headers is required", 400)
+
+        if not Auth.is_valid_token(token):
+            raise ApiException("Invalid Token", 400)
+
         if not request.is_json:
             raise ApiException("Request is not JSON", 400)
 
@@ -59,8 +93,16 @@ def update_client(curp: str, request: LocalProxy):
         return error_response(500, e.__class__.__name__, str(e))
 
 
-def delete_client(curp: str):
+def delete_client(curp: str, request: LocalProxy):
     try:
+        token = request.headers.get("Token", None)
+
+        if token is None:
+            raise ApiException("Token headers is required", 400)
+
+        if not Auth.is_valid_token(token):
+            raise ApiException("Invalid Token", 400)
+
         ClientTable.delete_by_curp(curp)
 
         return ok_response(200, {"deleted_at": datetime.today().isoformat()})
