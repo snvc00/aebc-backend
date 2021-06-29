@@ -14,6 +14,9 @@ python3 manage.py check_media_dirs
 
 if [ "$DJANGO_ENV" == "development" ]
 then
+    # Create test accounts
+    python3 manage.py test_accounts
+
     # Run development environment
     python3 manage.py runserver 0.0.0.0:8000
 else
