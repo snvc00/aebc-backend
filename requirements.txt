@@ -1,6 +1,11 @@
-Django==3.2.4
-django-cors-headers==3.7.0
-django-seed==0.2.2
-djangorestframework==3.12.4
-psycopg2==2.8.6
-google-api-python-client==2.4.0
+Django
+django-cors-headers
+django-seed
+djangorestframework
+psycopg2
+google-api-python-client
+Jinja2
+requests
+uWSGI
+pdfkit
+Pillow
