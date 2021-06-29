@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import os
 from pathlib import Path
 
-ENV = os.environ.get("DJANGO_ENV", "development")
+ENV = os.environ.get("DJANGO_ENV")
 
 if ENV is None:
     raise Exception("Missing ENV variable, make sure to add the .env file")
@@ -22,7 +22,7 @@ if ENV is None:
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "SK")
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = ENV == "development"
@@ -81,11 +81,11 @@ WSGI_APPLICATION = "aecb.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": os.environ.get("DJANGO_DB_BACKEND", "django.db.backends.postgresql"),
-        "NAME": os.environ.get("DJANGO_DB_NAME", "aecb"),
-        "USER": os.environ.get("DJANGO_DB_USER", "aecb"),
-        "PASSWORD": os.environ.get("DJANGO_DB_PASSWORD", "aecb"),
-        "HOST": os.environ.get("DJANGO_DB_HOST", "localhost"),
-        "PORT": os.environ.get("DJANGO_DB_PORT", 5432)
+        "NAME": os.environ.get("DJANGO_DB_NAME"),
+        "USER": os.environ.get("DJANGO_DB_USER"),
+        "PASSWORD": os.environ.get("DJANGO_DB_PASSWORD"),
+        "HOST": os.environ.get("DJANGO_DB_HOST"),
+        "PORT": os.environ.get("DJANGO_DB_PORT")
     }
 }
 
@@ -153,6 +153,14 @@ MEDIA_ROOT = os.environ.get(
     "DJANGO_MEDIA_ROOT", os.path.join(BASE_DIR, "media"))
 MEDIA_URL = "/media/"
 
+# SMTP
+EMAIL_BACKEND = os.environ.get("DJANGO_EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
+EMAIL_HOST = os.environ.get("DJANGO_EMAIL_HOST")
+EMAIL_PORT = os.environ.get("DJANGO_EMAIL_PORT")
+EMAIL_HOST_USER = os.environ.get("DJANGO_EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.environ.get("DJANGO_EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = True
+
 # Custom settings
-ADMIN_DOMAIN = os.environ.get("DJANGO_ADMIN_DOMAIN", "alumnos.udg.mx")
-AECB_EXTERNAL_API = os.environ.get("AEBC_EXTERNAL_API_ENDPOINT", "http://localhost:8080")
+ADMIN_DOMAIN = os.environ.get("DJANGO_ADMIN_DOMAIN")
+AECB_EXTERNAL_API = os.environ.get("AEBC_EXTERNAL_API_ENDPOINT")
