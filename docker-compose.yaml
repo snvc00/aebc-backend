@@ -16,9 +16,11 @@ services:
     depends_on:
       - postgres
     restart: on-failure
-  # aecb-external-api:
-  #   image: aecb-external-api
-  #   container_name: aecb-external-api
+  aecb-external-api:
+    image: aecb-external-api
+    container_name: aecb-external-api
+    ports:
+      - "8080:8080"
   postgres:
     image: postgres:9.6.21-alpine
     volumes:
@@ -29,13 +31,17 @@ services:
       POSTGRES_DB: aecb
     container_name: aecb-postgres
     command: -c listen_addresses=*
-  # aecb-frontend:
-  #   image: aecb-frontend
-  #   ports:
-  #     - "3000:3000"
-  #   container_name: aecb-frontend
-  #   depends_on: 
-  #     - aecb-backend
+  aecb-frontend:
+    image: aecb-frontend
+    env_file:
+      - .env
+    environment: 
+      NGINX_PORT: 80
+    ports:
+      - "80:80"
+    container_name: aecb-frontend
+    depends_on: 
+      - aecb-backend
 volumes:
   media:
   db:
