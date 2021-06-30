@@ -21,5 +21,5 @@ then
     python3 manage.py runserver 0.0.0.0:8000
 else
     # Enable uWSGI application
-    uwsgi --socket :8000 --master --enable-threads --module aecb.wsgi
+    uwsgi --socket :8000 --master --enable-threads --wsgi-file /api/aecb/wsgi.py
 fi
