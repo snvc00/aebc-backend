@@ -80,7 +80,7 @@ WSGI_APPLICATION = "aecb.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": os.environ.get("DJANGO_DB_BACKEND", "django.db.backends.postgresql"),
+        "ENGINE": "django.db.backends.postgresql",
         "NAME": os.environ.get("DJANGO_DB_NAME"),
         "USER": os.environ.get("DJANGO_DB_USER"),
         "PASSWORD": os.environ.get("DJANGO_DB_PASSWORD"),
