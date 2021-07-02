@@ -14,12 +14,12 @@ python3 manage.py check_media_dirs
 
 if [ "$DJANGO_ENV" == "development" ]
 then
-    # Create test accounts
-    python3 manage.py test_accounts
-
     # Run development environment
     python3 manage.py runserver 0.0.0.0:8000
 else
+    # Change ownership of media dir
+    chown -R aecb /var/www/media
+
     # Enable uWSGI application
-    uwsgi --socket :8000 --master --enable-threads --wsgi-file /api/aecb/wsgi.py
+    uwsgi --uid aecb --gid 1000 --socket :8000 --master --enable-threads --wsgi-file /api/aecb/wsgi.py
 fi
