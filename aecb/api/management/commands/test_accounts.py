@@ -1,4 +1,4 @@
-from aecb.api.models import Employee, Client
+from ...models import Employee, Client
 from django.core.management.base import BaseCommand
 from django_seed import Seed
 import os
@@ -16,7 +16,8 @@ class Command(BaseCommand):
                 "name": "Client",
                 "email": testing_client,
                 "rfc": "RFCXXXXXXXXXX",
-                "curp": "CURPXXXXXXXXXXXXXX"
+                "curp": "CURPXXXXXXXXXXXXXX",
+                "income": 1000000
             })
 
         if Employee.objects.filter(email=testing_admin).first() is None:
