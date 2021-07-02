@@ -18,7 +18,7 @@ class Command(BaseCommand):
                 if not path.isdir(new_media_dir):
                     print(new_media_dir)
                     mkdir(new_media_dir)
-        except:
-            raise Exception("Error during media directories creation")
+        except Exception as e:
+            raise Exception("Error during media directories creation. {}. {}.".format(str(e.__class__.__name__), str(e)))
         else:
-            print("Finish creating media dirs")
+            print("Finish creating media dirs.")
