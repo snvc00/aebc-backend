@@ -9,15 +9,12 @@ COPY . /api/
 
 WORKDIR /api
 
-RUN apt update && apt install -y -qq gcc libpq-dev \
+RUN apt update && apt install -y -qq gcc libpq-dev wkhtmltopdf \
     && pip3 install --no-cache-dir -U -r requirements.txt
 
 RUN mkdir -p /var/www/media/
 
-RUN useradd aecb && echo "aecb:${USER_PASSWORD}" | chpasswd \
-    && chown -R aecb /var/www/
-
-USER aecb
+RUN useradd aecb && echo "aecb:${USER_PASSWORD}" | chpasswd
 
 EXPOSE 8000
 
