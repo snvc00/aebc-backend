@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from aecb.api.models import Client, CreditCard, Employee, Account, Insurance, PreapprovalRequest, Promotion, Report
+from .models import Client, CreditCard, Employee, Account, Insurance, PreapprovalRequest, Promotion, Report
 
 
 class ClientSerializer(serializers.ModelSerializer):

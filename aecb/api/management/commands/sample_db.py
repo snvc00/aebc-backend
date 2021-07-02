@@ -1,7 +1,7 @@
 import random
 import string
 
-from aecb.api.models import *
+from ...models import *
 from django.core.management.base import BaseCommand
 from django.core import management
 from django_seed import Seed

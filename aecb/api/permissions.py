@@ -1,5 +1,5 @@
 from rest_framework import permissions
-from aecb.api.auth import GoogleTokenAuth
+from .auth import GoogleTokenAuth
 
 
 class ClientPermission(permissions.BasePermission):
