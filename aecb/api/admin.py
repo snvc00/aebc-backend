@@ -1,6 +1,5 @@
 from django.contrib import admin
 
-from .models import Employee, Report
+from .models import *
 
-admin.site.register(Employee)
-admin.site.register(Report)
+admin.site.register([Employee, Report, PreapprovalRequest, Client, CreditCard, Promotion, Insurance])
