@@ -5,25 +5,28 @@ import os
 import random
 import string
 import requests
-from aecb.api.auth import GoogleTokenAuth
-from aecb.api.models import (Account, Client, CreditCard, Employee, Insurance,
-                             PreapprovalRequest, Promotion, Report)
-from aecb.api.permissions import AdminPermission, ClientPermission
-from aecb.api.serializers import (ClientSerializer, CreditCardSerializer,
-                                  CreditCardSerializerWithDepth,
-                                  InsuranceSerializer,
-                                  PreapprovalRequestSerializer,
-                                  PreapprovalRequestSerializerWithDepth,
-                                  PromotionSerializer, ReportSerializer, ReportSerializerWithDepth)
+from .auth import GoogleTokenAuth
+from .models import (Account, Client, CreditCard, Employee, Insurance,
+                     PreapprovalRequest, Promotion, Report)
+from .permissions import AdminPermission, ClientPermission
+from .serializers import (ClientSerializer, CreditCardSerializer,
+                          CreditCardSerializerWithDepth,
+                          InsuranceSerializer,
+                          PreapprovalRequestSerializer,
+                          PreapprovalRequestSerializerWithDepth,
+                          PromotionSerializer, ReportSerializer, ReportSerializerWithDepth)
 from django.conf import settings
 from django.http.response import HttpResponse, JsonResponse
 from rest_framework import status, viewsets
-from rest_framework.decorators import action, permission_classes
+from rest_framework.decorators import action
 from django.core.mail import EmailMessage
 from rest_framework.generics import GenericAPIView
 from jinja2 import Environment, FileSystemLoader
 import pdfkit
+from weasyprint import HTML, CSS
+import logging
 
+logger = logging.getLogger(__name__)
 
 class AuthView(GenericAPIView):
     def get(self, request, format=None):
@@ -53,7 +56,8 @@ class AuthView(GenericAPIView):
             else:
                 if auth_result.account.role == "client":
                     if auth_result.account.user.active == False:
-                        raise Exception("{email} is not an active client".format(email=auth_result.account.user_email))
+                        raise Exception("{email} is not an active client".format(
+                            email=auth_result.account.user_email))
 
                 auth_result.account.token = token
                 auth_result.account.save()
@@ -77,7 +81,8 @@ class ClientViewSet(viewsets.ModelViewSet):
         client_params = {"income": client.income,
                          "has_credit": client.has_credit}
         try:
-            response = requests.get("{score_microservice}/score".format(score_microservice=settings.AECB_EXTERNAL_API), params=client_params)
+            response = requests.get("{score_microservice_endpoint}/score".format(
+                score_microservice_endpoint=settings.AECB_EXTERNAL_API), params=client_params)
         except Exception as e:
             return JsonResponse({"detail": "Error: external score service is unavailable."}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
@@ -103,10 +108,11 @@ class ClientViewSet(viewsets.ModelViewSet):
             if credit_card is None:
                 raise Exception("Invalid credit card")
 
-            active_preapproval = PreapprovalRequest.objects.filter(client=pk, active=True).first()
+            active_preapproval = PreapprovalRequest.objects.filter(
+                client=pk, active=True).first()
             if active_preapproval is None:
                 serializer = PreapprovalRequestSerializer(
-                data={"client": pk, "credit_card": credit_card.id})
+                    data={"client": pk, "credit_card": credit_card.id})
 
                 if serializer.is_valid():
                     serializer.save()
@@ -121,7 +127,7 @@ class ClientViewSet(viewsets.ModelViewSet):
             return HttpResponse(json.dumps(serializer.data), status=status.HTTP_200_OK)
 
         except Exception as e:
-            return JsonResponse({"detail":str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, permission_classes=[ClientPermission])
     def preapproval_requests(self, request, pk=None):
@@ -175,41 +181,44 @@ class PreapprovalRequestViewSet(viewsets.ModelViewSet):
 
     @action(detail=False)
     def generate_report(self, request):
-        email = request.headers.get("Admin-Email")
+        try:
+            email = request.headers.get("Admin-Email")
 
-        if email is None:
-            return JsonResponse({"detail": "Missing Admin-Email header"}, status=status.HTTP_400_BAD_REQUEST)
+            if email is None:
+                return JsonResponse({"detail": "Missing Admin-Email header"}, status=status.HTTP_400_BAD_REQUEST)
 
-        preapproval_stats = self.generate_stats()
-        active_ratio = (preapproval_stats.get(
-            "total_active_cards") / self.queryset.count()) * 100
-        approval_ratio = (preapproval_stats.get(
-            "total_approved_cards") / self.queryset.count()) * 100
-        card_approval = preapproval_stats.get("card_approval")
-        card_request = preapproval_stats.get("card_request")
+            preapproval_stats = self.generate_stats()
+            active_ratio = (preapproval_stats.get(
+                "total_active_cards") / self.queryset.count()) * 100
+            approval_ratio = (preapproval_stats.get(
+                "total_approved_cards") / self.queryset.count()) * 100
+            card_approval = preapproval_stats.get("card_approval")
+            card_request = preapproval_stats.get("card_request")
 
-        report = {
-            "requests": preapproval_stats.get("preapprovals"),
-            "clients": preapproval_stats.get("clients"),
-            "employees": preapproval_stats.get("employees"),
-            "active_ratio": active_ratio,
-            "approval_ratio": approval_ratio,
-            "most_approved": card_approval[0][0],
-            "most_requested": card_request[0][0],
-            "generated_by": email,
-        }
-        serializer = ReportSerializer(data=report)
+            report = {
+                "requests": preapproval_stats.get("preapprovals"),
+                "clients": preapproval_stats.get("clients"),
+                "employees": preapproval_stats.get("employees"),
+                "active_ratio": active_ratio,
+                "approval_ratio": approval_ratio,
+                "most_approved": card_approval[0][0],
+                "most_requested": card_request[0][0],
+                "generated_by": email,
+            }
+            serializer = ReportSerializer(data=report)
 
-        if serializer.is_valid():
-            serializer.save()
-            filename = self.generate_pdf(serializer.data["id"])
+            if serializer.is_valid():
+                serializer.save()
+                filename = self.generate_pdf(serializer.data["id"])
 
-            if filename is None:
-                return JsonResponse({"detail": "PDF report not generated"}, status=status.HTTP_400_BAD_REQUEST)
+                if filename is None:
+                    return JsonResponse({"detail": "PDF report not generated"}, status=status.HTTP_400_BAD_REQUEST)
 
-            return JsonResponse({"report": "{media}reports/{filename}".format(media=settings.MEDIA_URL, filename=filename)}, status=status.HTTP_200_OK)
+                return JsonResponse({"report": "{media}reports/{filename}".format(media=settings.MEDIA_URL, filename=filename)}, status=status.HTTP_200_OK)
 
-        return JsonResponse({"detail": "PDF report not generated"}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({"detail": "PDF report not generated"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return JsonResponse({"detail": str(e), "type": str(e.__class__.__name__)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def generate_stats(self):
         preapprovals = set()
@@ -260,30 +269,52 @@ class PreapprovalRequestViewSet(viewsets.ModelViewSet):
         template = env.get_template("report.html")
         html_string = template.render(report=serializer.data)
 
-
-        filename = "{pk}_report_{random}.pdf".format(pk=report_pk, random="".join(
-            random.choices(string.ascii_uppercase + string.digits, k=10)))
+        random_str = "".join(random.choices(
+            string.ascii_uppercase + string.digits, k=10))
+        filename = "{pk}_report_{random}.pdf".format(
+            pk=report_pk, random=random_str)
         file = os.path.join(settings.MEDIA_ROOT, "reports", filename)
-        report_created = pdfkit.from_string(html_string, file)
 
-        serializer.instance.file = "reports/{filename}".format(filename=filename)
+        options = {
+            "margin-top": "0.75in",
+            "margin-right": "0.75in",
+            "margin-bottom": "0.75in",
+            "margin-left": "0.75in"
+        }
+
+        try:
+            # First, try to generate pdf with pdfkit
+            report_created = pdfkit.from_string(html_string, file, options=options)
+        except:
+            try:
+                # In case of exception try with weasyprint
+                logger.error("pdfkit module failed creating pdf report")
+                html = HTML(string=html_string)
+                css = CSS(string="@page { margin: 0.75in }")
+                report_created = html.write_pdf(file, stylesheets=[css])
+            except Exception as e:
+                logger.error("weasyprint module failed creating pdf report")
+                logger.error(str(e.__class__.__name__), str(e))
+                report_created = False
+
+        serializer.instance.file = "reports/{file}".format(file=filename)
         serializer.instance.save()
 
         if report_created:
-            self.send_report(report_instance.generated_by.email, report_instance.generated_by.name, file)
+            self.send_report(report_instance.generated_by.email,
+                             report_instance.generated_by.name, file)
             return filename
 
         return None
 
     def send_report(self, employee_email, employee_name, pdf_report):
-        try:
-            email = EmailMessage(
-                "AECB Report {datetime}".format(datetime=datetime.now().strftime("%c")), 
-                "Hi {name}, you have generated a report successfully.".format(name=employee_name),
-                settings.EMAIL_HOST_USER,
-                [employee_email]
-            )
-            email.attach_file(pdf_report)
-            email.send()
-        except Exception as e:
-            print(str(e))
+        email = EmailMessage(
+            "AECB Report {datetime}".format(
+                datetime=datetime.now().strftime("%c")),
+            "Hi {name}, you have generated a report successfully.".format(
+                name=employee_name),
+            settings.EMAIL_HOST_USER,
+            [employee_email]
+        )
+        email.attach_file(pdf_report)
+        email.send()
